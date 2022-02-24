@@ -1,0 +1,52 @@
+pipeline {
+  agent {
+
+    docker {
+      image '84.201.178.145:5000/tomcat:v6'
+      args '-v /var/run/docker.sock:/var/run/docker.sock -u root'
+    }
+   }
+   
+    stages {
+        stage ('git') {
+            steps {
+                git 'https://github.com/kupa2004/226.git'
+            }
+        }
+   
+    
+        stage('build'){
+            steps {
+                sh 'mvn package'  
+            }
+        }
+        
+        stage ('git dockerfile') {
+            steps {
+                sh 'git clone https://github.com/kupa2004/HW_11.git'
+            }
+        }
+        
+        stage ('push images') {
+            steps {
+                 sh 'cd /var/lib/jenkins/workspace/test/HW_11 && docker build -t kupa:v003 .'
+                 sh '''docker tag kupa:v003 84.201.178.145:5000/kupa:v003 && docker push 84.201.178.145:5000/kupa:v003'''
+            }
+        }
+        
+        stage ('rm hw_11') {
+            steps {
+                 sh 'rm -rf /var/lib/jenkins/workspace/test/HW_11'
+            }
+        }
+        
+        stage ('run boxfuse') {
+            steps {
+                 sh '''docker pull 84.201.178.145:5000/kupa:v003
+                 docker run -d -v /var/lib/jenkins/workspace/test/target/:/usr/local/tomcat/webapps -p 8085:8080 84.201.178.145:5000/kupa:v003'''
+            }
+        }
+    }
+  }
+  
+  
