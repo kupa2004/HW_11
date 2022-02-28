@@ -31,15 +31,12 @@ pipeline {
 
         stage ('run boxfuse') {
             steps {
-                sh 'ssh-keyscan -H 51.250.20.226 >> ~/.ssh/known_hosts'
-                sh '''ssh root@m13 << EOF
-                 docker pull 84.201.178.145:5000/kupa:v003
-                 docker run -d -v /var/lib/jenkins/workspace/test/target/:/usr/local/tomcat/webapps -p 8085:8080 51.250.22.106:5000/kupa:v003
-                 EOF'''
+                sh 'mkdir /root/.ssh && chmod 0700 /root/.ssh && ssh-keyscan 51.250.20.226 >> ~/.ssh/known_hosts'
+                sh 'ssh root@51.250.20.226' 
+                sh '''docker pull 51.250.22.106:5000/kupa:v003
+                 docker run -d -v /var/lib/jenkins/workspace/test/target/:/usr/local/tomcat/webapps -p 8085:8080 51.250.22.106:5000/kupa:v003'''
             }
         }
     }
   }
-  
-  
   
