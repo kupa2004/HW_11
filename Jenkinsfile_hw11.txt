@@ -2,7 +2,7 @@ pipeline {
   agent {
 
     docker {
-      image '51.250.22.106:5000/tomcat:v6'
+      image '84.201.178.11:5000/tomcat:v6'
       args '-v /var/run/docker.sock:/var/run/docker.sock -u root'
     }
    }
@@ -24,22 +24,21 @@ pipeline {
       
         stage ('push images') {
             steps {
+                 sh 'cd /var/lib/jenkins/workspace/test/target/ && cp hello-1.0.war /var/lib/jenkins/workspace/test'
                  sh 'cd /var/lib/jenkins/workspace/test && docker build -t kupa:v003 .'
-                 sh '''docker tag kupa:v003 51.250.22.106:5000/kupa:v003 && docker push 51.250.22.106:5000/kupa:v003'''
+                 sh '''docker tag kupa:v003 84.201.178.11:5000/kupa:v003 && docker push 84.201.178.11:5000/kupa:v003'''
             }
         }
 
         stage ('run boxfuse') {
             steps {
-                sh 'mkdir /root/.ssh && chmod 0700 /root/.ssh && ssh-keyscan 51.250.20.226 >> ~/.ssh/known_hosts'
-                sh '''ssh root@51.250.20.226 /bin/bash << EOF 
-                 docker pull 51.250.22.106:5000/kupa:v003 
-                 docker run -d -v /var/lib/jenkins/workspace/test/target/:/usr/local/tomcat/webapps -p 8085:8080 51.250.22.106:5000/kupa:v003
+                sh 'ssh-keyscan 84.201.167.12 >> ~/.ssh/known_hosts'
+                sh '''ssh root@84.201.167.12 /bin/bash << EOF 
+                 docker pull 84.201.178.11:5000/kupa:v003 
+                 docker run -d -p 8085:8080 84.201.178.11:5000/kupa:v003
 EOF
                  '''
             }
         }
     }
   }
-  
-  
